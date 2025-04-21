@@ -1,5 +1,6 @@
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
@@ -19,6 +20,13 @@ local coinContainer = activeMap:WaitForChild("CoinContainer")
 local tweenTimePerStud = 0.07
 
 local function tweenTo(position)
+	character:WaitForChild("Humanoid").PlatformStand = true
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+		end
+	end
+
 	local distance = (hrp.Position - position).Magnitude
 	local tweenTime = math.clamp(distance * tweenTimePerStud, 0.5, 6)
 	local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
@@ -26,6 +34,13 @@ local function tweenTo(position)
 	local tween = TweenService:Create(hrp, tweenInfo, goal)
 	tween:Play()
 	tween.Completed:Wait()
+
+	character:WaitForChild("Humanoid").PlatformStand = false
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = true
+		end
+	end
 end
 
 local function getClosestCoin(coins, origin)
