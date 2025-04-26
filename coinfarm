@@ -25,8 +25,6 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
 
             local targetPart = rift.PrimaryPart
             if targetPart then
-                hrp.Anchored = true
-
                 noclipConnection = RunService.Stepped:Connect(function()
                     for _, part in ipairs(character:GetDescendants()) do
                         if part:IsA("BasePart") then
@@ -47,8 +45,6 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
                 if noclipConnection then
                     noclipConnection:Disconnect()
                 end
-
-                hrp.Anchored = false
 
                 local eventRemote = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event")
 
