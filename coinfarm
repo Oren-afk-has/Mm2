@@ -37,7 +37,7 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
                     CFrame = targetPart.CFrame * CFrame.new(0, 5, -5)
                 }
 
-                local tweenInfo = TweenInfo.new(15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                local tweenInfo = TweenInfo.new(25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                 local tween = TweenService:Create(hrp, tweenInfo, goal)
                 tween:Play()
                 tween.Completed:Wait()
