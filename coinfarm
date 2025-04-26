@@ -24,9 +24,9 @@ local labels = {
 
 for i, completed in ipairs(completedStatuses) do
     if completed.Visible then
-        print("Already opened: " .. i)
+        print("Box " .. i .. " - Already opened.")
     else
-        print("Ready to be opened: " .. i)
+        print("Box " .. i .. " - Ready to be opened.")
     end
 end
 
@@ -34,6 +34,6 @@ for i, label in ipairs(labels) do
     local labelText = label.Text
     -- Check if the label contains a number and print it
     if labelText:match("%d") then
-        print("Label with number: " .. labelText)
+        print("Box " .. i .. " - Label with number: " .. labelText)
     end
 end
