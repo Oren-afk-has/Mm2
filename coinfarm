@@ -1,12 +1,26 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hrp = character:WaitForChild("HumanoidRootPart")
 
 local found = false
+local riftToTeleport = nil
+local placeId = 85896571713843  -- Your PlaceId
+
+-- Function to check if any event rift exists
+local function hasEventRifts()
+    for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
+        if rift.Name == "event-1" or rift.Name == "event-2" then
+            return true
+        end
+    end
+    return false
+end
 
 for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
     if rift.Name == "event-1" or rift.Name == "event-2" then
@@ -27,7 +41,7 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
                     CFrame = targetPart.CFrame * CFrame.new(0, 5, -5)
                 }
 
-                local tweenInfo = TweenInfo.new(20, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+                local tweenInfo = TweenInfo.new(15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
                 local tween = TweenService:Create(hrp, tweenInfo, goal)
                 tween:Play()
                 tween.Completed:Wait()
@@ -55,7 +69,27 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
                 end
             end
 
+            riftToTeleport = rift
             break
         end
+    end
+end
+
+-- Monitor if the rift has despawned and check for remaining rifts
+if riftToTeleport then
+    local riftDespawned = false
+    riftToTeleport.Destroyed:Connect(function()
+        riftDespawned = true
+    end)
+
+    -- Wait until rift despawns
+    repeat
+        task.wait(1)
+    until riftDespawned
+
+    -- Check if there are still event rifts left
+    if not hasEventRifts() then
+        -- Teleport to a completely new server (guaranteed)
+        TeleportService:Teleport(placeId, player)
     end
 end
