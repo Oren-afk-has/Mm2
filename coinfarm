@@ -1,105 +1,39 @@
-local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local completedStatuses = {
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["1"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["2"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["3"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["4"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["5"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["6"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["7"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["8"].Completed,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["9"].Completed
+}
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local hrp = character:WaitForChild("HumanoidRootPart")
+local labels = {
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["1"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["2"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["3"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["4"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["5"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["6"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["7"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["8"].Button.Label,
+    game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.Playtime.Frame.Main["9"].Button.Label
+}
 
-local activeMap
-for _, child in ipairs(workspace:GetChildren()) do
-	if child:IsA("Model") and child:FindFirstChild("CoinContainer") then
-		activeMap = child
-		break
-	end
+for i, completed in ipairs(completedStatuses) do
+    if completed.Visible then
+        print("Already opened: " .. i)
+    else
+        print("Ready to be opened: " .. i)
+    end
 end
 
-if not activeMap then return end
-
-local coinContainer = activeMap:WaitForChild("CoinContainer")
-local tweenTimePerStud = 0.07
-
-local function tweenTo(position)
-	character:WaitForChild("Humanoid").PlatformStand = true
-	for _, part in ipairs(character:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.CanCollide = false
-		end
-	end
-
-	local distance = (hrp.Position - position).Magnitude
-	local tweenTime = math.clamp(distance * tweenTimePerStud, 0.5, 6)
-	local tweenInfo = TweenInfo.new(tweenTime, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut)
-	local goal = {CFrame = CFrame.new(position + Vector3.new(0, 5, 0))}
-	local tween = TweenService:Create(hrp, tweenInfo, goal)
-	tween:Play()
-	tween.Completed:Wait()
-
-	character:WaitForChild("Humanoid").PlatformStand = false
-	for _, part in ipairs(character:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.CanCollide = true
-		end
-	end
+for i, label in ipairs(labels) do
+    local labelText = label.Text
+    -- Check if the label contains a number and print it
+    if labelText:match("%d") then
+        print("Label with number: " .. labelText)
+    end
 end
-
-local function getClosestCoin(coins, origin)
-	local closestCoin, shortestDist
-	for _, coin in ipairs(coins) do
-		local pos
-		if coin:IsA("BasePart") then
-			pos = coin.Position
-		elseif coin:IsA("Model") and coin.PrimaryPart then
-			pos = coin.PrimaryPart.Position
-		elseif coin:IsA("Model") then
-			local primary = coin:FindFirstChildWhichIsA("BasePart")
-			if primary then
-				pos = primary.Position
-			end
-		end
-
-		if pos then
-			local dist = (origin - pos).Magnitude
-			if not shortestDist or dist < shortestDist then
-				shortestDist = dist
-				closestCoin = coin
-			end
-		end
-	end
-	return closestCoin
-end
-
-task.spawn(function()
-	local visited = {}
-	while true do
-		local allCoins = coinContainer:GetChildren()
-		local unvisited = {}
-		for _, coin in ipairs(allCoins) do
-			if not visited[coin] then
-				table.insert(unvisited, coin)
-			end
-		end
-
-		if #unvisited == 0 then break end
-
-		local closest = getClosestCoin(unvisited, hrp.Position)
-		if closest then
-			visited[closest] = true
-			local pos
-			if closest:IsA("BasePart") then
-				pos = closest.Position
-			elseif closest:IsA("Model") and closest.PrimaryPart then
-				pos = closest.PrimaryPart.Position
-			else
-				local primary = closest:FindFirstChildWhichIsA("BasePart")
-				if primary then
-					pos = primary.Position
-				end
-			end
-
-			if pos then
-				tweenTo(pos)
-			end
-		end
-	end
-end)
