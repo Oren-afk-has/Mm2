@@ -24,31 +24,24 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Config", Icon = "" }),
 }
 
--- Create an ImageLabel for the Fluent UI icon and add it above the section
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-
-local imageLabel = Instance.new("ImageLabel")
-imageLabel.Parent = screenGui
-imageLabel.Size = UDim2.new(0, 100, 0, 100)  -- Set the size of the icon
-imageLabel.Position = UDim2.new(0.5, -50, 0.1, 0)  -- Position the icon above the section (adjust as needed)
-imageLabel.Image = "rbxassetid://114318970307342"  -- Your Image ID here
-imageLabel.BackgroundTransparency = 1  -- Make the background transparent
-
--- Optional: Add functionality, like when clicked
-imageLabel.MouseButton1Click:Connect(function()
-    print("Icon clicked!")
-end)
-
--- Create the "Credits" section in the "Home" tab
+-- Create an image as part of the paragraph or as an ImageLabel in the "Home" tab
 local Section = Tabs.Home:AddSection("Credits")
 
+-- Adding image and paragraph content
 Tabs.Home:AddParagraph({
     Title = "Paragraph",
     Content = "This is a paragraph.\nSecond line!"
 })
 
--- Config Saving
+-- If you want to add an image within the section, do it like this:
+local imageLabel = Instance.new("ImageLabel")
+imageLabel.Parent = Section -- Assuming the section is a Frame or UIContainer
+imageLabel.Size = UDim2.new(0, 100, 0, 100)  -- Adjust size as needed
+imageLabel.Position = UDim2.new(0, 0, 0, 0)  -- Positioning it at the top-left corner of the section
+imageLabel.Image = "rbxassetid://114318970307342"  -- Image ID here
+imageLabel.BackgroundTransparency = 1  -- Make the background transparent
+
+--Config Saving
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 SaveManager:SetLibrary(Fluent)
