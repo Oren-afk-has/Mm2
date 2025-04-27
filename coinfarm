@@ -1,67 +1,85 @@
-local rifteggs = {}
-local uniqueRifts = {}
+--Source
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
--- Iterate over the Rifts to populate the dropdown options
-for _, item in pairs(workspace.Rendered.Rifts:GetChildren()) do
-    if item.Name ~= "golden-chest" and item.Name ~= "royal-chest" and item.Name ~= "gift-rift" then
-        if not uniqueRifts[item.Name] then
-            table.insert(rifteggs, item.Name)
-            uniqueRifts[item.Name] = true
-        end
-    end
-end
-
-local selectedRift = nil  -- Variable to store the selected Rift name
-local tweenService = game:GetService("TweenService")
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
--- Dropdown to select the Rift
-local Dropdown = Tabs.Rifts:AddDropdown("Dropdown", {
-    Title = "AutoFarm Rifts",
-    Description = "Select Rifts You Want To Auto Hatch",
-    Values = rifteggs,
-    Multi = false,
-    Default = 0,
+--Window
+local Window = Fluent:CreateWindow({
+    Title = "Fluent " .. Fluent.Version,
+    SubTitle = "By Oren",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = false,
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- Update the selected Rift when the dropdown value changes
-Dropdown.OnChanged = function(selected)
-    selectedRift = selected
-    print("Player selected Rift: " .. selectedRift)
-end
+--Tabs
+local Tabs = {
+    Home = Window:AddTab({ Title = "Home", Icon = "" }),
+    Farming = Window:AddTab({ Title = "Farming", Icon = "" }),
+    Hatching = Window:AddTab({ Title = "Hatching", Icon = "" }),
+    Pets = Window:AddTab({ Title = "Pets", Icon = "" }),
+    Rifts = Window:AddTab({ Title = "Rifts", Icon = "" }),
+    Quests = Window:AddTab({ Title = "Quests", Icon = "" }),
+    Merchant = Window:AddTab({ Title = "Merchants", Icon = "" }),
+    Potions = Window:AddTab({ Title = "Potions", Icon = "" }),
+    Teleport = Window:AddTab({ Title = "Teleport", Icon = "" }),
+    Others = Window:AddTab({ Title = "Others", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Config", Icon = "" }),
+}
 
--- Toggle to start auto-farming and tween the player to the selected Rift
-local Toggle = Tabs.Rifts:AddToggle("rifts", {
-    Title = "AutoFarm Rifts",
-    Description = "AutoFarm Selected Rifts",
+--Credits
+local Section = Tabs.Home:AddSection("Credits")
+Section:AddParagraph({
+    Title = "This Script Is A Work In Progess I Dunno If This Will Ever Be \nRealeased"
+})
+
+-- Farming
+local Section = Tabs.Farming:AddSection("Blowing")
+local Toggle = Tabs.Farming:AddToggle("Blow", 
+{
+    Title = "Auto Blow Bubbles", 
+    Description = "Automatically Blows Bubbles For You",
     Default = false,
     Callback = function(state)
         if state then
-            if selectedRift and selectedRift ~= "" then
-                -- Find the Display part of the selected Rift
-                local selectedRiftObject = workspace.Rendered.Rifts:FindFirstChild(selectedRift)
-                if selectedRiftObject then
-                    local displayPart = selectedRiftObject:FindFirstChild("Display")
-                    if displayPart then
-                        -- Tween the player to the selected Rift's Display part
-                        local goal = displayPart.Position
-                        local tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-                        local tween = tweenService:Create(humanoidRootPart, tweenInfo, {Position = goal})
-                        tween:Play()
-                        print("Tweening to Rift: " .. selectedRift)
-                    else
-                        print("Display part not found for Rift: " .. selectedRift)
-                    end
-                else
-                    print("Rift not found: " .. selectedRift)
-                end
-            else
-                print("No Rift selected!")
+            while state do
+                local args = {
+                    [1] = "BlowBubble"
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+                task.wait()
             end
-        else
-            print("Toggle Off")
         end
     end
 })
+
+local Dropdown = Tabs.RiftsAddDropdown("RiftEggsDropdown", {
+    Title = "Rift Eggs",
+    Description = "Select a Rift Egg",
+    Values = {},
+    Multi = false,
+    Default = 1,
+    Callback = function(Value)
+        if Value then
+            game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer("Teleport", "Workspace.Worlds.The Overworld.FastTravel.Spawn");
+            task.wait(1);
+            TweenTo(Value.Display.CFrame, 15);
+            task.wait(16);
+            repeat
+                task.wait();
+                if (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame.Position - Value.Display.CFrame.Position).Magnitude > 20 then
+                    TweenTo(Value.Display.CFrame, 15);
+                    task.wait(16);
+                end;
+            until (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame.Position - Value.Display.CFrame.Position).Magnitude <= 20
+        end;
+    end;
+})
+
+--Config Saving
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
