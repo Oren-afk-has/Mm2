@@ -60,7 +60,7 @@ for _, item in pairs(workspace.Rendered.Rifts:GetChildren()) do
     end
 end
 
-local Dropdown = Tab:AddDropdown("Dropdown", {
+local Dropdown = Tabs.Rifts:AddDropdown("Dropdown", {
     Title = "Dropdown",
     Description = "Dropdown description",
     Values = rifteggs,
