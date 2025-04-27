@@ -59,14 +59,16 @@ local excluded = {
     ["royal-chest"] = true,
 }
 
+-- Create the dropdown first with empty Values (we'll fill them in)
 local MultiDropdown = Tabs.Rifts:AddDropdown("MultiDropdown", {
     Title = "Rifts",
     Description = "Select What Rift You Want To Hatch",
-    Values = {},
+    Values = {}, -- Empty for now
     Multi = true,
     Default = {},
 })
 
+-- Collect rift names
 local riftNames = {}
 for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
     if not excluded[rift.Name] then
@@ -74,47 +76,8 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
     end
 end
 
+-- Update the dropdown's Values
 MultiDropdown:SetValues(riftNames)
-
-local Toggle = Tabs.Rifts:AddToggle("Rift", {
-    Title = "AutoFarm Rift",
-    Description = "AutoFarms Selected Rift",
-    Default = false,
-    Callback = function(state)
-        if state then
-            -- Start autofarming (Tween to selected Rift)
-            local selectedRifts = MultiDropdown.Values  -- This is the property storing selected values
-            
-            for _, riftName in ipairs(selectedRifts) do
-                local rift = workspace.Rendered.Rifts:FindFirstChild(riftName)
-                if rift then
-                    local sign = rift:FindFirstChild("Sign")
-                    if sign then
-                        -- Find a part within the "Sign" model to use for the position
-                        local signPart = sign:FindFirstChildOfClass("BasePart")  -- Looks for the first BasePart (Part, MeshPart, etc.)
-                        if signPart then
-                            -- Tween the player to the part's position
-                            local player = game.Players.LocalPlayer
-                            local char = player.Character
-                            if char then
-                                local hrp = char:WaitForChild("HumanoidRootPart")
-                                if hrp then
-                                    local tweenService = game:GetService("TweenService")
-                                    local goal = {Position = signPart.Position}
-                                    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false)
-                                    local tween = tweenService:Create(hrp, tweenInfo, goal)
-                                    tween:Play()
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        else
-            -- Toggle off (Stop tweens or reset to original position)
-        end
-    end
-})
 
 --Config Saving
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
