@@ -1,76 +1,26 @@
---Source
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
 
---Window
-local Window = Fluent:CreateWindow({
-    Title = "Fluent " .. Fluent.Version,
-    SubTitle = "By Oren",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = false,
-    Theme = "Darker",
-    MinimizeKey = Enum.KeyCode.LeftControl
-})
+local sellModel = workspace.Worlds["The Overworld"].Sell
+local targetPosition = sellModel.PrimaryPart.Position  -- Use PrimaryPart to get the position
+local originalPosition = hrp.Position
+local distance = (hrp.Position - targetPosition).Magnitude
+local speed = 50
+local timeToReachTarget = distance / speed
+local tweenInfo = TweenInfo.new(timeToReachTarget, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
 
---Tabs
-local Tabs = {
-    Home = Window:AddTab({ Title = "Home", Icon = "" }),
-    Farming = Window:AddTab({ Title = "Farming", Icon = "" }),
-    Hatching = Window:AddTab({ Title = "Hatching", Icon = "" }),
-    Pets = Window:AddTab({ Title = "Pets", Icon = "" }),
-    Rifts = Window:AddTab({ Title = "Rifts", Icon = "" }),
-    Quests = Window:AddTab({ Title = "Quests", Icon = "" }),
-    Merchant = Window:AddTab({ Title = "Merchants", Icon = "" }),
-    Potions = Window:AddTab({ Title = "Potions", Icon = "" }),
-    Teleport = Window:AddTab({ Title = "Teleport", Icon = "" }),
-    Others = Window:AddTab({ Title = "Others", Icon = "" }),
-    Settings = Window:AddTab({ Title = "Config", Icon = "" }),
-}
+local function tweenPlayer()
+    local goalToTarget = { CFrame = CFrame.new(targetPosition) }
+    local tweenToTarget = TweenService:Create(hrp, tweenInfo, goalToTarget)
+    tweenToTarget:Play()
+    tweenToTarget.Completed:Wait()
 
---Credits
-local Section = Tabs.Home:AddSection("Credits")
-Section:AddParagraph({
-    Title = "This Script Is A Work In Progess I Dunno If This Will Ever Be \nRealeased"
-})
+    local goalToOriginal = { CFrame = CFrame.new(originalPosition) }
+    local tweenToOriginal = TweenService:Create(hrp, tweenInfo, goalToOriginal)
+    tweenToOriginal:Play()
+end
 
--- Farming
-local Section = Tabs.Farming:AddSection("Blowing")
-local Toggle = Tabs.Farming:AddToggle("Blow", 
-{
-    Title = "Auto Blow Bubbles", 
-    Description = "Automatically Blows Bubbles For You",
-    Default = false,
-    Callback = function(state)
-        if state then
-            while state do
-                local args = {
-                    [1] = "BlowBubble"
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
-                task.wait()
-            end
-        end
-    end
-})
-
-local Section = Tabs.Farming:AddSection("Selling")
-local Input = Tabs.Farming:AddInput("Sell", {
-    Title = "Timed AutoSell",
-    Description = "",
-    Default = "60",
-    Placeholder = "60",
-    Numeric = true,
-    Finished = false,
-    Callback = function(Value)
-        print("Input changed:", Value)
-    end
-})
-
-
---Config Saving
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
+tweenPlayer()
