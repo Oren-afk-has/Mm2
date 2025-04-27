@@ -74,7 +74,6 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
     end
 end
 
---Rift
 MultiDropdown:SetValues(riftNames)
 
 local Toggle = Tabs.Rifts:AddToggle("Rift", {
@@ -84,24 +83,28 @@ local Toggle = Tabs.Rifts:AddToggle("Rift", {
     Callback = function(state)
         if state then
             -- Start autofarming (Tween to selected Rift)
-            local selectedRifts = MultiDropdown:GetSelection()  -- Correct method to get selected rifts
+            local selectedRifts = MultiDropdown.Values  -- This is the property storing selected values
             
             for _, riftName in ipairs(selectedRifts) do
                 local rift = workspace.Rendered.Rifts:FindFirstChild(riftName)
                 if rift then
                     local sign = rift:FindFirstChild("Sign")
                     if sign then
-                        -- Tween the player to the Sign position
-                        local player = game.Players.LocalPlayer
-                        local char = player.Character
-                        if char then
-                            local hrp = char:WaitForChild("HumanoidRootPart")
-                            if hrp then
-                                local tweenService = game:GetService("TweenService")
-                                local goal = {Position = sign.Position}
-                                local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false)
-                                local tween = tweenService:Create(hrp, tweenInfo, goal)
-                                tween:Play()
+                        -- Find a part within the "Sign" model to use for the position
+                        local signPart = sign:FindFirstChildOfClass("BasePart")  -- Looks for the first BasePart (Part, MeshPart, etc.)
+                        if signPart then
+                            -- Tween the player to the part's position
+                            local player = game.Players.LocalPlayer
+                            local char = player.Character
+                            if char then
+                                local hrp = char:WaitForChild("HumanoidRootPart")
+                                if hrp then
+                                    local tweenService = game:GetService("TweenService")
+                                    local goal = {Position = signPart.Position}
+                                    local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, false)
+                                    local tween = tweenService:Create(hrp, tweenInfo, goal)
+                                    tween:Play()
+                                end
                             end
                         end
                     end
