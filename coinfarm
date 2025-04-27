@@ -1,5 +1,7 @@
+--Source
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
+--Window
 local Window = Fluent:CreateWindow({
     Title = "Fluent " .. Fluent.Version,
     SubTitle = "By Oren",
@@ -10,6 +12,7 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
+--Tabs
 local Tabs = {
     Home = Window:AddTab({ Title = "Home", Icon = "" }),
     Farming = Window:AddTab({ Title = "Farming", Icon = "" }),
@@ -24,22 +27,33 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Config", Icon = "" }),
 }
 
--- Create an image as part of the paragraph or as an ImageLabel in the "Home" tab
+--Credits
 local Section = Tabs.Home:AddSection("Credits")
-
--- Adding image and paragraph content
-Tabs.Home:AddParagraph({
-    Title = "Paragraph",
-    Content = "This is a paragraph.\nSecond line!"
+Section:AddParagraph({
+    Title = "This Script Is A Work In Progess I Dunno If This Will Ever Be \nRealeased"
 })
 
--- If you want to add an image within the section, do it like this:
-local imageLabel = Instance.new("ImageLabel")
-imageLabel.Parent = Section -- Assuming the section is a Frame or UIContainer
-imageLabel.Size = UDim2.new(0, 100, 0, 100)  -- Adjust size as needed
-imageLabel.Position = UDim2.new(0, 0, 0, 0)  -- Positioning it at the top-left corner of the section
-imageLabel.Image = "rbxassetid://114318970307342"  -- Image ID here
-imageLabel.BackgroundTransparency = 1  -- Make the background transparent
+-- Farming
+local Section = Tabs.Farming:AddSection("Blowing")
+
+local Toggle = Tabs.Farming:AddToggle("Bubbles", 
+{
+    Title = "Auto Blow Bubbles", 
+    Description = "Automatically Blows Bubbles For You",
+    Default = false,
+    Callback = function(state)
+        if state then
+            -- When the toggle is on, fire the "BlowBubble" event
+            local args = {
+                [1] = "BlowBubble"
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+        else
+            -- You can add an "off" state action here if needed
+            print("Auto Blow Bubbles is OFF")
+        end
+    end
+})
 
 --Config Saving
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
