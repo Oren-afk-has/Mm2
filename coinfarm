@@ -54,19 +54,28 @@ local Toggle = Tabs.Farming:AddToggle("Blow",
 })
 
 local rifteggs = {}
+local uniqueRifts = {}
+
 for _, item in pairs(workspace.Rendered.Rifts:GetChildren()) do
     if item.Name ~= "golden-chest" and item.Name ~= "royal-chest" and item.Name ~= "gift-rift" then
-        table.insert(rifteggs, item.Name)
+        if not uniqueRifts[item.Name] then
+            table.insert(rifteggs, item.Name)
+            uniqueRifts[item.Name] = true
+        end
     end
 end
 
 local Dropdown = Tabs.Rifts:AddDropdown("Dropdown", {
-    Title = "Dropdown",
-    Description = "Dropdown description",
+    Title = "AutoFarm Rifts",
+    Description = "Select Rifts You Want To Auto Hatch",
     Values = rifteggs,
     Multi = false,
-    Default = 1,
+    Default = 0,
 })
+
+Dropdown.OnChanged = function(selectedRift)
+    print("Player selected Rift: " .. selectedRift)
+end
 
 --Config Saving
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
