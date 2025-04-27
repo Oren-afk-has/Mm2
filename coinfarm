@@ -53,79 +53,19 @@ local Toggle = Tabs.Farming:AddToggle("Blow",
     end
 })
 
--- Existing Rift Dropdown Code
-local excluded = {
-    ["gift-rift"] = true,
-    ["golden-chest"] = true,
-    ["royal-chest"] = true,
-}
-
-local MultiDropdown = Tabs.Rifts:AddDropdown("MultiDropdown", {
-    Title = "Rifts",
-    Description = "Select What Rift You Want To Hatch",
-    Values = {},
-    Multi = false,  -- Set to false if you only want to allow one rift selection at a time
-    Default = {},
-})
-
-local riftNames = {}
-for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
-    if not excluded[rift.Name] then
-        table.insert(riftNames, rift.Name)
+local rifteggs = {}
+for _, item in pairs(workspace.Rendered.Rifts:GetChildren()) do
+    if item.Name ~= "golden-chest" and item.Name ~= "royal-chest" and item.Name ~= "gift-rift" then
+        table.insert(rifteggs, item.Name)
     end
 end
 
-MultiDropdown:SetValues(riftNames)
-
--- Tweening to Selected Rift
-local TweenService = game:GetService("TweenService")
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
-
--- Add a Toggle to the "Rifts" Tab for Tweening
-local Toggle = Tabs.Rifts:AddToggle("TweenToRift", {
-    Title = "Tween To Rift",
-    Description = "Automatically Tweens To The Selected Rift",
-    Default = false,
-    Callback = function(state)
-        if state then
-            -- Get the selected rift from the dropdown
-            local selectedRiftName = MultiDropdown:GetValue()
-
-            -- Check if a rift is selected
-            if selectedRiftName and selectedRiftName ~= "" then
-                -- Find the rift in the workspace
-                local selectedRift = workspace.Rendered.Rifts:FindFirstChild(selectedRiftName)
-
-                if selectedRift then
-                    -- Create a tween to move the player towards the rift
-                    local goalPosition = selectedRift.CFrame.Position
-                    local distance = (goalPosition - humanoidRootPart.Position).Magnitude
-
-                    -- Create a TweenInfo to control the speed and ease of the movement
-                    local tweenInfo = TweenInfo.new(distance / 50, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-
-                    local goal = {
-                        Position = goalPosition
-                    }
-
-                    -- Create the tween
-                    local tween = TweenService:Create(humanoidRootPart, tweenInfo, goal)
-
-                    -- Play the tween
-                    tween:Play()
-
-                    -- Stop the tween if it completes and the toggle is off
-                    tween.Completed:Connect(function()
-                        if not state then
-                            return
-                        end
-                    end)
-                end
-            end
-        end
-    end
+local Dropdown = Tab:AddDropdown("Dropdown", {
+    Title = "Dropdown",
+    Description = "Dropdown description",
+    Values = rifteggs,
+    Multi = false,
+    Default = 1,
 })
 
 --Config Saving
