@@ -35,25 +35,37 @@ Section:AddParagraph({
 
 -- Farming
 local Section = Tabs.Farming:AddSection("Blowing")
-
-local Toggle = Tabs.Farming:AddToggle("Bubbles", 
+local Toggle = Tabs.Farming:AddToggle("Blow", 
 {
     Title = "Auto Blow Bubbles", 
     Description = "Automatically Blows Bubbles For You",
     Default = false,
     Callback = function(state)
         if state then
-            -- When the toggle is on, fire the "BlowBubble" event
-            local args = {
-                [1] = "BlowBubble"
-            }
-            game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
-        else
-            -- You can add an "off" state action here if needed
-            print("Auto Blow Bubbles is OFF")
+            while state do
+                local args = {
+                    [1] = "BlowBubble"
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+                task.wait()
+            end
         end
     end
 })
+
+local Section = Tabs.Farming:AddSection("Selling")
+local Input = Tabs.Farming:AddInput("Sell", {
+    Title = "Timed AutoSell",
+    Description = "",
+    Default = "60",
+    Placeholder = "60",
+    Numeric = true,
+    Finished = false,
+    Callback = function(Value)
+        print("Input changed:", Value)
+    end
+})
+
 
 --Config Saving
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
