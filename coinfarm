@@ -53,29 +53,16 @@ local Toggle = Tabs.Farming:AddToggle("Blow",
     end
 })
 
-local Toggle = Tabs.Hatching:AddToggle("EggAnimation", 
-{
-    Title = "Remove Egg Animation", 
-    Description = "Removes Any Egg Animation For Better Experience ",
-    Default = false,
-    Callback = function(state)
-        if state then
-            local Module = require(game:GetService("ReplicatedStorage").Client.Effects.HatchEgg)
+local MultiDropdown = Tabs.Rifts:AddDropdown("MultiDropdown", {
+    Title = "Rifts",
+    Description = "Select What Rift You Want To Hatch",
+    Values = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen"},
+    Multi = true,
+    Default = {"seven", "twelve"},
+ })
 
-            Module.Play = function(self, result)
-                if result and result.Pets then
-                    local gui = game.Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui")
-                    gui.Hatching.Visible = false
-                    gui.HUD.Visible = true
-                    self._hatching = false
-                end
-            end
 
-            local result = { Pets = {} }
-            Module.Play(Module, result)
-        end
-    end
-})
+
 
 --Config Saving
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
