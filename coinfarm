@@ -111,6 +111,12 @@ for _, rift in ipairs(workspace.Rendered.Rifts:GetChildren()) do
     end
 end
 
+-- Debugging: Check if any rift names are being collected
+print("Rift Names Collected: ", #riftNames)
+for _, name in ipairs(riftNames) do
+    print(name)
+end
+
 -- Only update the dropdown if there are valid rift names
 if #riftNames > 0 then
     MultiDropdown:SetValues(riftNames)
