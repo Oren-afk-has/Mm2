@@ -1,7 +1,6 @@
---Source
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
---Window
+-- Window
 local Window = Fluent:CreateWindow({
     Title = "Bgsi Private Script",
     SubTitle = "By Oren",
@@ -12,7 +11,7 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
---Tabs
+-- Tabs
 local Tabs = {
     Home = Window:AddTab({ Title = "Home", Icon = "" }),
     Farming = Window:AddTab({ Title = "Farming", Icon = "" }),
@@ -27,7 +26,7 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Config", Icon = "" }),
 }
 
---Credits
+-- Credits
 local Section = Tabs.Home:AddSection("Credits")
 Section:AddParagraph({
     Title = "This Script Is A Work In Progess I Dunno If This Will Ever Be \nRealeased"
@@ -35,47 +34,280 @@ Section:AddParagraph({
 
 -- Farming
 local Section = Tabs.Farming:AddSection("Blowing")
-local Toggle = Tabs.Farming:AddToggle("Blow", 
-{
-    Title = "Auto Blow Bubbles", 
+local Blow = false
+
+local BlowToggle = Tabs.Farming:AddToggle("Bubble", {
+    Title = "Auto Blow Bubbles",
     Description = "Automatically Blows Bubbles For You",
     Default = false,
     Callback = function(state)
-        if state then
-            while state do
-                local args = {
-                    [1] = "BlowBubble"
-                }
-                game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
-                task.wait()
-            end
-        end
+        Blow = state
     end
 })
 
-local Toggle = Tabs.Farming:AddToggle("AutoFarmCoins", 
-{
-    Title = "AutoCollect Coins", 
+task.spawn(function()
+    while true do
+        if Blow then
+            local args = {
+                [1] = "BlowBubble"
+            }
+            game:GetService("ReplicatedStorage")
+                :WaitForChild("Shared")
+                :WaitForChild("Framework")
+                :WaitForChild("Network")
+                :WaitForChild("Remote")
+                :WaitForChild("Event")
+                :FireServer(unpack(args))
+        end
+        task.wait()
+    end
+end)
+
+local Toggle
+local Coins = false
+
+Toggle = Tabs.Farming:AddToggle("Coins", {
+    Title = "AutoCollect Coins",
     Description = "Automatically Collect Coins",
     Default = false,
     Callback = function(state)
-        if state then
-            local Coins = workspace.Rendered:GetChildren()[13]
-            while state do
-                for _, child in ipairs(Coins:GetChildren()) do
-                    local args = {
-                        [1] = child.Name
-                    }
-                    game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(unpack(args))
-                    child:Destroy()
-                end
-                task.wait()
-            end
-        end
+        Coins = state
     end
 })
 
---Config Saving
+task.spawn(function()
+    while true do
+        if Coins then
+            local Coins = workspace.Rendered:GetChildren()[13]
+            for _, child in ipairs(Coins:GetChildren()) do
+                local args = {
+                    [1] = child.Name
+                }
+                game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(unpack(args))
+                child:Destroy()
+            end
+        end
+        task.wait()
+    end
+end)
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+local Eggs = {
+    "common-egg",
+    "spotted-egg",
+    "iceshard-egg",
+    "spikey-egg",
+    "magma-egg",
+    "crystal-egg",
+    "lunar-egg",
+    "void-egg",
+    "hell-egg",
+    "nightmare-egg",
+    "rainbow-egg",
+    "throwback-egg",
+    "event-3",
+    "silly-egg"
+}
+
+local MultiDropdown = Tabs.Rifts:AddDropdown("MultiDropdown", {
+    Title = "Auto Rift",
+    Description = "Select Rifts You Would Like To Hatch",
+    Values = Eggs,
+    Multi = true,
+    Default = {},
+})
+
+-- Store active tween for cancellation
+local activeTween = nil
+local originalPosition = nil
+local isReturningToOriginal = false
+
+local function stopCurrentTween()
+    if activeTween then
+        activeTween:Cancel()
+        activeTween = nil
+    end
+    isReturningToOriginal = false
+end
+
+local function disableCollisions(character)
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false
+        end
+    end
+end
+
+local function enableCollisions(character)
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true
+        end
+    end
+end
+
+local function tweenPlayerToRift(player, rift)
+    stopCurrentTween()
+    isReturningToOriginal = false
+
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    disableCollisions(character)
+
+    local targetPart = rift:FindFirstChild("Display")
+    if not targetPart then 
+        print("⚠️ No Display part found in rift:", rift.Name)
+        return false 
+    end
+
+    if not originalPosition then
+        originalPosition = humanoidRootPart.CFrame
+    end
+
+    local targetCFrame = targetPart.CFrame
+    local endCFrame = targetCFrame + Vector3.new(0, 3, 0)
+    local distance = (humanoidRootPart.Position - endCFrame.Position).Magnitude
+
+    if distance < 10 then
+        enableCollisions(character)
+        return true
+    end
+
+    local tweenInfo = TweenInfo.new(
+        distance / 500,
+        Enum.EasingStyle.Linear,
+        Enum.EasingDirection.Out,
+        0,
+        false
+    )
+
+    local goal = {CFrame = endCFrame}
+    activeTween = TweenService:Create(humanoidRootPart, tweenInfo, goal)
+    activeTween:Play()
+
+    local completed = false
+    local tweenCompleted = Instance.new("BindableEvent")
+
+    local connection
+    connection = activeTween.Completed:Connect(function()
+        completed = true
+        connection:Disconnect()
+        tweenCompleted:Fire(true)
+        enableCollisions(character)
+    end)
+
+    return tweenCompleted.Event:Wait()
+end
+
+local function tweenPlayerBackToOriginalPosition()
+    if not originalPosition then return end
+
+    stopCurrentTween()
+    isReturningToOriginal = true
+
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    disableCollisions(character)
+
+    local args = {
+        [1] = "Teleport",
+        [2] = "Workspace.Worlds.The Overworld.PortalSpawn"
+    }
+    game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer(unpack(args))
+    
+    task.wait(1)
+
+    local distance = (humanoidRootPart.Position - originalPosition.Position).Magnitude
+
+    if distance < 10 then
+        isReturningToOriginal = false
+        enableCollisions(character)
+        return true
+    end
+
+    local tweenInfo = TweenInfo.new(
+        distance / 30,
+        Enum.EasingStyle.Linear,
+        Enum.EasingDirection.Out,
+        0,
+        false
+    )
+
+    local goal = {CFrame = originalPosition}
+    activeTween = TweenService:Create(humanoidRootPart, tweenInfo, goal)
+    activeTween:Play()
+
+    local completed = false
+    local tweenCompleted = Instance.new("BindableEvent")
+
+    local connection
+    connection = activeTween.Completed:Connect(function()
+        completed = true
+        isReturningToOriginal = false
+        connection:Disconnect()
+        tweenCompleted:Fire(true)
+        enableCollisions(character)
+    end)
+
+    return tweenCompleted.Event:Wait()
+end
+
+local riftCheckLoop
+local Toggle = Tabs.Rifts:AddToggle("MyToggle", {
+    Title = "AutoFarm Rifts", 
+    Description = "Automatically finds and moves to selected rifts",
+    Default = false,
+    Callback = function(state)
+        if state then
+            local selectedEggs = MultiDropdown:GetActiveValues()
+
+            riftCheckLoop = task.spawn(function()
+                while task.wait(1) do
+                    if isReturningToOriginal then
+                        continue
+                    end
+
+                    stopCurrentTween()
+
+                    local riftsFolder = workspace.Rendered.Rifts
+                    local foundRift = false
+
+                    for _, eggName in pairs(selectedEggs) do
+                        local rift = riftsFolder:FindFirstChild(eggName)
+                        if rift then
+                            print("✅ Found rift:", eggName)
+                            local success = tweenPlayerToRift(player, rift)
+
+                            if success then
+                                print("🏁 Reached rift:", eggName)
+                                foundRift = true
+                                break
+                            end
+                        end
+                    end
+
+                    if not foundRift and not isReturningToOriginal then
+                        print("🔍 No available rifts found")
+                        tweenPlayerBackToOriginalPosition()
+                    end
+                end
+            end)
+        else
+            if riftCheckLoop then
+                task.cancel(riftCheckLoop)
+            end
+            stopCurrentTween()
+            print("⏹ Stopped rift searching")
+        end
+    end 
+})
+
+-- Config Saving
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 SaveManager:SetLibrary(Fluent)
