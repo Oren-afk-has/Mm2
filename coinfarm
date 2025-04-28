@@ -3,7 +3,7 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 
 --Window
 local Window = Fluent:CreateWindow({
-    Title = "Fluent " .. Fluent.Version,
+    Title = "Bgsi Private Script",
     SubTitle = "By Oren",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
@@ -53,27 +53,26 @@ local Toggle = Tabs.Farming:AddToggle("Blow",
     end
 })
 
-local Dropdown = Tabs.RiftsAddDropdown("RiftEggsDropdown", {
-    Title = "Rift Eggs",
-    Description = "Select a Rift Egg",
-    Values = {},
-    Multi = false,
-    Default = 1,
-    Callback = function(Value)
-        if Value then
-            game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Framework"):WaitForChild("Network"):WaitForChild("Remote"):WaitForChild("Event"):FireServer("Teleport", "Workspace.Worlds.The Overworld.FastTravel.Spawn");
-            task.wait(1);
-            TweenTo(Value.Display.CFrame, 15);
-            task.wait(16);
-            repeat
-                task.wait();
-                if (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame.Position - Value.Display.CFrame.Position).Magnitude > 20 then
-                    TweenTo(Value.Display.CFrame, 15);
-                    task.wait(16);
-                end;
-            until (game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame.Position - Value.Display.CFrame.Position).Magnitude <= 20
-        end;
-    end;
+local Toggle = Tabs.Farming:AddToggle("AutoFarmCoins", 
+{
+    Title = "AutoCollect Coins", 
+    Description = "Automatically Collect Coins",
+    Default = false,
+    Callback = function(state)
+        if state then
+            local Coins = workspace.Rendered:GetChildren()[13]
+            while state do
+                for _, child in ipairs(Coins:GetChildren()) do
+                    local args = {
+                        [1] = child.Name
+                    }
+                    game:GetService("ReplicatedStorage").Remotes.Pickups.CollectPickup:FireServer(unpack(args))
+                    child:Destroy()
+                end
+                task.wait()
+            end
+        end
+    end
 })
 
 --Config Saving
